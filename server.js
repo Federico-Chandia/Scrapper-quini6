@@ -28,7 +28,16 @@ db.serialize(() => {
 // Función para hacer scrapping de los resultados
 async function scrapQuini6() {
   try {
-    const response = await axios.get('https://www.quini-6-resultados.com.ar/');
+    const response = await axios.get('https://www.quini-6-resultados.com.ar/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'es-ES,es;q=0.8,en-US;q=0.5,en;q=0.3',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1'
+      }
+    });
     const $ = cheerio.load(response.data);
     
     const resultados = [];
@@ -71,7 +80,16 @@ function guardarResultados(resultados, fecha = null) {
 // Función para obtener enlaces de sorteos anteriores
 async function obtenerEnlacesSorteos() {
   try {
-    const response = await axios.get('https://www.quini-6-resultados.com.ar/');
+    const response = await axios.get('https://www.quini-6-resultados.com.ar/', {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'es-ES,es;q=0.8,en-US;q=0.5,en;q=0.3',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1'
+      }
+    });
     const $ = cheerio.load(response.data);
     
     const enlaces = [];
@@ -98,7 +116,16 @@ async function obtenerEnlacesSorteos() {
 // Función para hacer scrapping de un sorteo específico
 async function scrapSorteoEspecifico(url) {
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'es-ES,es;q=0.8,en-US;q=0.5,en;q=0.3',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1'
+      }
+    });
     const $ = cheerio.load(response.data);
     
     const resultados = [];
