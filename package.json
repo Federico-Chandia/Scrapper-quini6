@@ -2,9 +2,9 @@
   "name": "quini6-scrapper",
   "version": "1.0.0",
   "description": "Scrapper para resultados de Quini 6",
-  "main": "server.js",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node ./server.js",
+    "start": "node src/server.js",
     "dev": "nodemon server.js"
   },
   "dependencies": {
