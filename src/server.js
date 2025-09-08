@@ -24,6 +24,51 @@ db.serialize(() => {
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(fecha, sorteo, numeros)
   )`);
+  
+  // Insertar datos de ejemplo si la tabla está vacía
+  db.get('SELECT COUNT(*) as count FROM sorteos', (err, row) => {
+    if (!err && row.count === 0) {
+      const datosEjemplo = [
+        // Septiembre 2025
+        { fecha: '2025-09-07', sorteo: 'TRADICIONAL', numeros: '33 - 02 - 28 - 40 - 19 - 05' },
+        { fecha: '2025-09-07', sorteo: 'LA SEGUNDA', numeros: '31 - 36 - 25 - 24 - 09 - 42' },
+        { fecha: '2025-09-07', sorteo: 'REVANCHA', numeros: '03 - 27 - 12 - 50 - 18 - 75' },
+        { fecha: '2025-09-03', sorteo: 'TRADICIONAL', numeros: '33 - 01 - 33 - 43 - 29 - 20' },
+        { fecha: '2025-09-03', sorteo: 'LA SEGUNDA', numeros: '42 - 39 - 01 - 42 - 13 - 36' },
+        { fecha: '2025-09-03', sorteo: 'REVANCHA', numeros: '12 - 50 - 18 - 75 - 25 - 00' },
+        // Agosto 2025
+        { fecha: '2025-08-31', sorteo: 'TRADICIONAL', numeros: '33 - 00 - 28 - 36 - 26 - 21' },
+        { fecha: '2025-08-31', sorteo: 'LA SEGUNDA', numeros: '12 - 29 - 35 - 30 - 09 - 34' },
+        { fecha: '2025-08-31', sorteo: 'REVANCHA', numeros: '01 - 28 - 12 - 50 - 18 - 75' },
+        { fecha: '2025-08-27', sorteo: 'TRADICIONAL', numeros: '32 - 99 - 17 - 45 - 11 - 08' },
+        { fecha: '2025-08-27', sorteo: 'LA SEGUNDA', numeros: '36 - 22 - 19 - 15 - 24 - 45' },
+        { fecha: '2025-08-27', sorteo: 'REVANCHA', numeros: '02 - 07 - 10 - 00 - 15 - 00' },
+        { fecha: '2025-08-24', sorteo: 'TRADICIONAL', numeros: '32 - 98 - 09 - 44 - 08 - 04' },
+        { fecha: '2025-08-24', sorteo: 'LA SEGUNDA', numeros: '43 - 29 - 25 - 22 - 15 - 44' },
+        { fecha: '2025-08-24', sorteo: 'REVANCHA', numeros: '26 - 35 - 10 - 00 - 15 - 00' },
+        { fecha: '2025-08-20', sorteo: 'TRADICIONAL', numeros: '32 - 97 - 18 - 42 - 16 - 05' },
+        { fecha: '2025-08-20', sorteo: 'LA SEGUNDA', numeros: '56 - 22 - 39 - 38 - 16 - 44' },
+        { fecha: '2025-08-20', sorteo: 'REVANCHA', numeros: '27 - 34 - 10 - 00 - 15 - 00' },
+        { fecha: '2025-08-17', sorteo: 'TRADICIONAL', numeros: '32 - 96 - 30 - 43 - 07 - 02' },
+        { fecha: '2025-08-17', sorteo: 'LA SEGUNDA', numeros: '12 - 29 - 34 - 33 - 12 - 44' },
+        { fecha: '2025-08-17', sorteo: 'REVANCHA', numeros: '05 - 17 - 10 - 00 - 15 - 00' },
+        { fecha: '2025-08-13', sorteo: 'TRADICIONAL', numeros: '32 - 95 - 22 - 31 - 26 - 23' },
+        { fecha: '2025-08-13', sorteo: 'LA SEGUNDA', numeros: '33 - 23 - 11 - 40 - 08 - 17' },
+        { fecha: '2025-08-10', sorteo: 'TRADICIONAL', numeros: '32 - 94 - 32 - 44 - 09 - 01' },
+        { fecha: '2025-08-10', sorteo: 'LA SEGUNDA', numeros: '32 - 22 - 17 - 44 - 07 - 23' },
+        { fecha: '2025-08-06', sorteo: 'TRADICIONAL', numeros: '32 - 93 - 29 - 42 - 26 - 00' },
+        { fecha: '2025-08-06', sorteo: 'LA SEGUNDA', numeros: '30 - 23 - 38 - 27 - 24 - 44' },
+        { fecha: '2025-08-06', sorteo: 'REVANCHA', numeros: '04 - 32 - 10 - 00 - 15 - 00' }
+      ];
+      
+      datosEjemplo.forEach(dato => {
+        db.run('INSERT INTO sorteos (fecha, sorteo, numeros) VALUES (?, ?, ?)',
+          [dato.fecha, dato.sorteo, dato.numeros]);
+      });
+      
+      console.log('✅ Datos de ejemplo cargados');
+    }
+  });
 });
 
 // Función para crear Pozo Extra
