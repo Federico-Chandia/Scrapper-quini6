@@ -47,7 +47,7 @@ function crearPozoExtra(resultados) {
 }
 
 // Endpoint para obtener resultados actuales
-app.get('/resultados', async (req, res) => {
+app.get('/sorteos', async (req, res) => {
   try {
     db.all(
       'SELECT * FROM sorteos WHERE fecha = (SELECT MAX(fecha) FROM sorteos) ORDER BY id',
@@ -143,13 +143,43 @@ app.get('/todoslossorteos', (req, res) => {
   );
 });
 
+// Endpoint para sorteo específico
+app.get('/sorteo/:nro', (req, res) => {
+  const nro = req.params.nro;
+  db.all(
+    'SELECT * FROM sorteos WHERE fecha LIKE ? ORDER BY id',
+    [`%${nro}%`],
+    (err, rows) => {
+      if (err || rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          error: 'Sorteo no encontrado'
+        });
+      }
+      
+      const resultados = rows.map(row => ({
+        sorteo: row.sorteo,
+        numeros: row.numeros
+      }));
+      
+      res.json({
+        success: true,
+        data: resultados,
+        fecha: rows[0].fecha,
+        timestamp: new Date().toISOString()
+      });
+    }
+  );
+});
+
 // Endpoint principal
 app.get('/', (req, res) => {
   res.json({
     message: 'Quini 6 Scrapper API - Fuente Oficial Lotería Santa Fe',
     endpoints: {
-      resultados: '/resultados',
-      todosLosSorteos: '/todoslossorteos'
+      sorteos: '/sorteos',
+      todosLosSorteos: '/todoslossorteos',
+      sorteoEspecifico: '/sorteo/{nro}',
     }
   });
 });
