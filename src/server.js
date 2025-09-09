@@ -1,10 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
-const cron = require('node-cron');
-const pdfParse = require('pdf-parse');
-const fs = require('fs');
-const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,51 +21,98 @@ db.serialize(() => {
     UNIQUE(fecha, sorteo, numeros)
   )`);
   
-  // Insertar datos de ejemplo si la tabla está vacía
-  db.get('SELECT COUNT(*) as count FROM sorteos', (err, row) => {
-    if (!err && row.count === 0) {
-      const datosEjemplo = [
-        // Septiembre 2025
-        { fecha: '2025-09-07', sorteo: 'TRADICIONAL', numeros: '33 - 02 - 28 - 40 - 19 - 05' },
-        { fecha: '2025-09-07', sorteo: 'LA SEGUNDA', numeros: '31 - 36 - 25 - 24 - 09 - 42' },
-        { fecha: '2025-09-07', sorteo: 'REVANCHA', numeros: '03 - 27 - 12 - 50 - 18 - 75' },
-        { fecha: '2025-09-03', sorteo: 'TRADICIONAL', numeros: '33 - 01 - 33 - 43 - 29 - 20' },
-        { fecha: '2025-09-03', sorteo: 'LA SEGUNDA', numeros: '42 - 39 - 01 - 42 - 13 - 36' },
-        { fecha: '2025-09-03', sorteo: 'REVANCHA', numeros: '12 - 50 - 18 - 75 - 25 - 00' },
-        // Agosto 2025
-        { fecha: '2025-08-31', sorteo: 'TRADICIONAL', numeros: '33 - 00 - 28 - 36 - 26 - 21' },
-        { fecha: '2025-08-31', sorteo: 'LA SEGUNDA', numeros: '12 - 29 - 35 - 30 - 09 - 34' },
-        { fecha: '2025-08-31', sorteo: 'REVANCHA', numeros: '01 - 28 - 12 - 50 - 18 - 75' },
-        { fecha: '2025-08-27', sorteo: 'TRADICIONAL', numeros: '32 - 99 - 17 - 45 - 11 - 08' },
-        { fecha: '2025-08-27', sorteo: 'LA SEGUNDA', numeros: '36 - 22 - 19 - 15 - 24 - 45' },
-        { fecha: '2025-08-27', sorteo: 'REVANCHA', numeros: '02 - 07 - 10 - 00 - 15 - 00' },
-        { fecha: '2025-08-24', sorteo: 'TRADICIONAL', numeros: '32 - 98 - 09 - 44 - 08 - 04' },
-        { fecha: '2025-08-24', sorteo: 'LA SEGUNDA', numeros: '43 - 29 - 25 - 22 - 15 - 44' },
-        { fecha: '2025-08-24', sorteo: 'REVANCHA', numeros: '26 - 35 - 10 - 00 - 15 - 00' },
-        { fecha: '2025-08-20', sorteo: 'TRADICIONAL', numeros: '32 - 97 - 18 - 42 - 16 - 05' },
-        { fecha: '2025-08-20', sorteo: 'LA SEGUNDA', numeros: '56 - 22 - 39 - 38 - 16 - 44' },
-        { fecha: '2025-08-20', sorteo: 'REVANCHA', numeros: '27 - 34 - 10 - 00 - 15 - 00' },
-        { fecha: '2025-08-17', sorteo: 'TRADICIONAL', numeros: '32 - 96 - 30 - 43 - 07 - 02' },
-        { fecha: '2025-08-17', sorteo: 'LA SEGUNDA', numeros: '12 - 29 - 34 - 33 - 12 - 44' },
-        { fecha: '2025-08-17', sorteo: 'REVANCHA', numeros: '05 - 17 - 10 - 00 - 15 - 00' },
-        { fecha: '2025-08-13', sorteo: 'TRADICIONAL', numeros: '32 - 95 - 22 - 31 - 26 - 23' },
-        { fecha: '2025-08-13', sorteo: 'LA SEGUNDA', numeros: '33 - 23 - 11 - 40 - 08 - 17' },
-        { fecha: '2025-08-10', sorteo: 'TRADICIONAL', numeros: '32 - 94 - 32 - 44 - 09 - 01' },
-        { fecha: '2025-08-10', sorteo: 'LA SEGUNDA', numeros: '32 - 22 - 17 - 44 - 07 - 23' },
-        { fecha: '2025-08-06', sorteo: 'TRADICIONAL', numeros: '32 - 93 - 29 - 42 - 26 - 00' },
-        { fecha: '2025-08-06', sorteo: 'LA SEGUNDA', numeros: '30 - 23 - 38 - 27 - 24 - 44' },
-        { fecha: '2025-08-06', sorteo: 'REVANCHA', numeros: '04 - 32 - 10 - 00 - 15 - 00' }
+  // Limpiar y cargar datos reales siempre
+  db.run('DELETE FROM sorteos', (err) => {
+    if (err) {
+      console.error('Error limpiando datos:', err);
+      return;
+    }
+    console.log('✅ Datos anteriores eliminados');
+    
+    // Cargar datos correctos
+      const datosReales = [
+        // 7 de Septiembre 2025
+        { fecha: '2025-09-07', sorteo: 'TRADICIONAL', numeros: '05 - 18 - 19 - 28 - 39 - 40' },
+        { fecha: '2025-09-07', sorteo: 'LA SEGUNDA', numeros: '17 - 18 - 19 - 24 - 25 - 43' },
+        { fecha: '2025-09-07', sorteo: 'REVANCHA', numeros: '00 - 09 - 11 - 38 - 40 - 42' },
+        { fecha: '2025-09-07', sorteo: 'SIEMPRE SALE', numeros: '03 - 04 - 20 - 27 - 31 - 41' },
+        // 3 de Septiembre 2025
+        { fecha: '2025-09-03', sorteo: 'TRADICIONAL', numeros: '20 - 24 - 29 - 33 - 39 - 43' },
+        { fecha: '2025-09-03', sorteo: 'LA SEGUNDA', numeros: '06 - 16 - 25 - 39 - 42 - 44' },
+        { fecha: '2025-09-03', sorteo: 'REVANCHA', numeros: '00 - 01 - 30 - 35 - 39 - 42' },
+        { fecha: '2025-09-03', sorteo: 'SIEMPRE SALE', numeros: '13 - 29 - 35 - 36 - 37 - 43' },
+        // 31 de Agosto 2025
+        { fecha: '2025-08-31', sorteo: 'TRADICIONAL', numeros: '21 - 22 - 26 - 28 - 30 - 36' },
+        { fecha: '2025-08-31', sorteo: 'LA SEGUNDA', numeros: '00 - 12 - 18 - 30 - 35 - 42' },
+        { fecha: '2025-08-31', sorteo: 'REVANCHA', numeros: '08 - 09 - 14 - 18 - 31 - 34' },
+        { fecha: '2025-08-31', sorteo: 'SIEMPRE SALE', numeros: '01 - 03 - 20 - 28 - 29 - 40' },
+        // 27 de Agosto 2025
+        { fecha: '2025-08-27', sorteo: 'TRADICIONAL', numeros: '08 - 10 - 11 - 17 - 38 - 45' },
+        { fecha: '2025-08-27', sorteo: 'LA SEGUNDA', numeros: '00 - 01 - 11 - 15 - 19 - 35' },
+        { fecha: '2025-08-27', sorteo: 'REVANCHA', numeros: '23 - 24 - 32 - 33 - 44 - 45' },
+        { fecha: '2025-08-27', sorteo: 'SIEMPRE SALE', numeros: '02 - 05 - 06 - 07 - 16 - 33' },
+        // 24 de Agosto 2025
+        { fecha: '2025-08-24', sorteo: 'TRADICIONAL', numeros: '04 - 05 - 08 - 09 - 12 - 44' },
+        { fecha: '2025-08-24', sorteo: 'LA SEGUNDA', numeros: '06 - 07 - 09 - 22 - 25 - 34' },
+        { fecha: '2025-08-24', sorteo: 'REVANCHA', numeros: '14 - 15 - 20 - 26 - 41 - 44' },
+        { fecha: '2025-08-24', sorteo: 'SIEMPRE SALE', numeros: '26 - 30 - 33 - 35 - 40 - 44' },
+        // 20 de Agosto 2025
+        { fecha: '2025-08-20', sorteo: 'TRADICIONAL', numeros: '05 - 14 - 16 - 18 - 32 - 42' },
+        { fecha: '2025-08-20', sorteo: 'LA SEGUNDA', numeros: '08 - 23 - 24 - 38 - 39 - 44' },
+        { fecha: '2025-08-20', sorteo: 'REVANCHA', numeros: '10 - 16 - 23 - 34 - 38 - 44' },
+        { fecha: '2025-08-20', sorteo: 'SIEMPRE SALE', numeros: '27 - 30 - 33 - 34 - 42 - 44' },
+        // 17 de Agosto 2025
+        { fecha: '2025-08-17', sorteo: 'TRADICIONAL', numeros: '02 - 06 - 07 - 30 - 40 - 43' },
+        { fecha: '2025-08-17', sorteo: 'LA SEGUNDA', numeros: '25 - 26 - 28 - 33 - 34 - 35' },
+        { fecha: '2025-08-17', sorteo: 'REVANCHA', numeros: '25 - 26 - 28 - 33 - 34 - 35' },
+        { fecha: '2025-08-17', sorteo: 'SIEMPRE SALE', numeros: '05 - 10 - 11 - 17 - 24 - 34' },
+        // 13 de Agosto 2025
+        { fecha: '2025-08-13', sorteo: 'TRADICIONAL', numeros: '16 - 18 - 20 - 22 - 28 - 31' },
+        { fecha: '2025-08-13', sorteo: 'LA SEGUNDA', numeros: '01 - 02 - 17 - 23 - 33 - 43' },
+        { fecha: '2025-08-13', sorteo: 'REVANCHA', numeros: '03 - 11 - 12 - 29 - 39 - 40' },
+        { fecha: '2025-08-13', sorteo: 'SIEMPRE SALE', numeros: '08 - 09 - 12 - 17 - 35 - 36' },
+        // 10 de Agosto 2025
+        { fecha: '2025-08-10', sorteo: 'TRADICIONAL', numeros: '01 - 02 - 09 - 32 - 36 - 44' },
+        { fecha: '2025-08-10', sorteo: 'LA SEGUNDA', numeros: '06 - 15 - 19 - 22 - 32 - 39' },
+        { fecha: '2025-08-10', sorteo: 'REVANCHA', numeros: '08 - 17 - 24 - 31 - 43 - 44' },
+        { fecha: '2025-08-10', sorteo: 'SIEMPRE SALE', numeros: '07 - 09 - 13 - 23 - 32 - 35' },
+        // 6 de Agosto 2025
+        { fecha: '2025-08-06', sorteo: 'TRADICIONAL', numeros: '00 - 18 - 26 - 29 - 32 - 42' },
+        { fecha: '2025-08-06', sorteo: 'LA SEGUNDA', numeros: '07 - 22 - 25 - 27 - 38 - 45' },
+        { fecha: '2025-08-06', sorteo: 'REVANCHA', numeros: '16 - 24 - 33 - 34 - 40 - 44' },
+        { fecha: '2025-08-06', sorteo: 'SIEMPRE SALE', numeros: '04 - 11 - 27 - 32 - 41 - 45' }
       ];
       
-      datosEjemplo.forEach(dato => {
+      datosReales.forEach(dato => {
         db.run('INSERT INTO sorteos (fecha, sorteo, numeros) VALUES (?, ?, ?)',
           [dato.fecha, dato.sorteo, dato.numeros]);
       });
       
-      console.log('✅ Datos de ejemplo cargados');
-    }
+      console.log('✅ Datos reales cargados - Septiembre 2025');
   });
 });
+
+// Función para cargar datos hardcodeados
+function cargarDatosReales() {
+  // Limpiar datos anteriores
+  db.run('DELETE FROM sorteos', (err) => {
+    if (err) {
+      console.error('Error limpiando datos:', err);
+      return;
+    }
+    console.log('✅ Datos anteriores eliminados');
+  });
+}
+
+// Función para guardar resultados
+function guardarResultados(resultados, fecha) {
+  resultados.forEach(resultado => {
+    db.run(
+      'INSERT OR IGNORE INTO sorteos (fecha, sorteo, numeros) VALUES (?, ?, ?)',
+      [fecha, resultado.sorteo, resultado.numeros]
+    );
+  });
+}
 
 // Función para crear Pozo Extra
 function crearPozoExtra(resultados) {
@@ -91,7 +134,7 @@ function crearPozoExtra(resultados) {
   };
 }
 
-// Endpoint para obtener resultados actuales
+// Endpoints
 app.get('/sorteos', async (req, res) => {
   try {
     db.all(
@@ -129,7 +172,6 @@ app.get('/sorteos', async (req, res) => {
   }
 });
 
-// Endpoint para obtener todos los sorteos
 app.get('/todoslossorteos', (req, res) => {
   db.all(
     'SELECT DISTINCT fecha FROM sorteos ORDER BY fecha DESC LIMIT 10',
@@ -188,7 +230,6 @@ app.get('/todoslossorteos', (req, res) => {
   );
 });
 
-// Endpoint para sorteo específico
 app.get('/sorteo/:nro', (req, res) => {
   const nro = req.params.nro;
   db.all(
@@ -217,14 +258,13 @@ app.get('/sorteo/:nro', (req, res) => {
   );
 });
 
-// Endpoint principal
 app.get('/', (req, res) => {
   res.json({
     message: 'Quini 6 Scrapper API - Fuente Oficial Lotería Santa Fe',
     endpoints: {
       sorteos: '/sorteos',
       todosLosSorteos: '/todoslossorteos',
-      sorteoEspecifico: '/sorteo/{nro}',
+      sorteoEspecifico: '/sorteo/{nro}'
     }
   });
 });
